@@ -241,36 +241,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const joints = [];
     const links = [];
 
-    // Pre-create SVG Elements (Performance optimization)
-    for (let i = 0; i < 21; i++) {
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('r', '1.0');
-        circle.setAttribute('cx', '50');
-        circle.setAttribute('cy', '50');
-        circle.setAttribute('class', 'hand-joint');
-        if ([4, 8, 12, 16, 20].includes(i)) {
-            circle.classList.add('hand-joint-tip');
-            circle.setAttribute('r', '1.3');
-        }
-        jointsGroup.appendChild(circle);
-        joints.push(circle);
+    // Pre-create SVG Elements for up to 2 hands (42 landmarks, 44 links)
+for (let i = 0; i < 42; i++) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('r', '1.0');
+    circle.setAttribute('cx', '50');
+    circle.setAttribute('cy', '50');
+    circle.setAttribute('class', 'hand-joint');
+    if ([4, 8, 12, 16, 20, 25, 29, 33, 37, 41].includes(i)) {
+        circle.classList.add('hand-joint-tip');
+        circle.setAttribute('r', '1.3');
     }
+    jointsGroup.appendChild(circle);
+    joints.push(circle);
+}
 
-    connections.forEach(([from, to]) => {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', '50');
-        line.setAttribute('y1', '50');
-        line.setAttribute('x2', '50');
-        line.setAttribute('y2', '50');
-        line.setAttribute('class', 'hand-link');
-        if ([0, 5, 9, 13, 17].includes(from) && [1, 5, 9, 13, 17].includes(to)) {
-            line.classList.add('hand-link-bone');
-        }
-        linksGroup.appendChild(line);
-        links.push({ line, from, to });
-    });
+const allConnections = [];
+connections.forEach(([from, to]) => allConnections.push([from, to]));
+connections.forEach(([from, to]) => allConnections.push([from + 21, to + 21]));
 
-    function setSkeletonVisibility(visible) {
+allConnections.forEach(([from, to]) => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '50');
+    line.setAttribute('y1', '50');
+    line.setAttribute('x2', '50');
+    line.setAttribute('y2', '50');
+    line.setAttribute('class', 'hand-link');
+    // base hand indices
+    const bFrom = from % 21;
+    const bTo = to % 21;
+    if ([0, 5, 9, 13, 17].includes(bFrom) && [1, 5, 9, 13, 17].includes(bTo)) {
+        line.classList.add('hand-link-bone');
+    }
+    linksGroup.appendChild(line);
+    links.push({ line, from, to });
+});
+
+function setSkeletonVisibility(visible) {
         const opacityVal = visible ? '1' : '0';
         jointsGroup.setAttribute('opacity', opacityVal);
         linksGroup.setAttribute('opacity', opacityVal);
@@ -359,38 +366,50 @@ document.addEventListener('DOMContentLoaded', () => {
         actionDisplay.style.textShadow = `0 0 10px rgba(${data.action_color.join(',')}, 0.5)`;
 
         // Draw hand landmarks
-        const lms = data.landmarks;
-        if (lms && lms.length === 21 && toggleModalityGestures.checked) {
-            warningOverlay.classList.add('hidden');
-            setSkeletonVisibility(true);
-            
-            lms.forEach((lm, index) => {
-                const cx = (lm.x * 100).toFixed(2);
-                const cy = (lm.y * 100).toFixed(2);
-                joints[index].setAttribute('cx', cx);
-                joints[index].setAttribute('cy', cy);
-            });
-            
-            links.forEach(({ line, from, to }) => {
-                const x1 = (lms[from].x * 100).toFixed(2);
-                const y1 = (lms[from].y * 100).toFixed(2);
-                const x2 = (lms[to].x * 100).toFixed(2);
-                const y2 = (lms[to].y * 100).toFixed(2);
-                line.setAttribute('x1', x1);
-                line.setAttribute('y1', y1);
-                line.setAttribute('x2', x2);
-                line.setAttribute('y2', y2);
-            });
+    const lms = data.landmarks;
+    if (lms && lms.length >= 21 && toggleModalityGestures.checked) {
+        warningOverlay.classList.add('hidden');
+        setSkeletonVisibility(true);
+        
+        const numHands = Math.floor(lms.length / 21);
 
-            // Draw Virtual Cursor
-            const idxTip = lms[8];
-            const vCursorX = (idxTip.x * 100).toFixed(2);
-            const vCursorY = (idxTip.y * 100).toFixed(2);
-            virtualCursor.setAttribute('cx', vCursorX);
-            virtualCursor.setAttribute('cy', vCursorY);
-            virtualCursorCore.setAttribute('cx', vCursorX);
-            virtualCursorCore.setAttribute('cy', vCursorY);
-        } else {
+        joints.forEach((circle, index) => {
+            if (index < numHands * 21) {
+                circle.setAttribute('opacity', '1');
+                const cx = (lms[index].x * 100).toFixed(2);
+                const cy = (lms[index].y * 100).toFixed(2);
+                circle.setAttribute('cx', cx);
+                circle.setAttribute('cy', cy);
+            } else {
+                circle.setAttribute('opacity', '0');
+            }
+        });
+
+        links.forEach((linkObj, index) => {
+            if (index < numHands * 22) {
+                linkObj.line.setAttribute('opacity', '1');
+                const x1 = (lms[linkObj.from].x * 100).toFixed(2);
+                const y1 = (lms[linkObj.from].y * 100).toFixed(2);
+                const x2 = (lms[linkObj.to].x * 100).toFixed(2);
+                const y2 = (lms[linkObj.to].y * 100).toFixed(2);
+                linkObj.line.setAttribute('x1', x1);
+                linkObj.line.setAttribute('y1', y1);
+                linkObj.line.setAttribute('x2', x2);
+                linkObj.line.setAttribute('y2', y2);
+            } else {
+                linkObj.line.setAttribute('opacity', '0');
+            }
+        });
+
+        // Draw Virtual Cursor
+        const idxTip = lms[8];
+        const vCursorX = (idxTip.x * 100).toFixed(2);
+        const vCursorY = (idxTip.y * 100).toFixed(2);
+        virtualCursor.setAttribute('cx', vCursorX);
+        virtualCursor.setAttribute('cy', vCursorY);
+        virtualCursorCore.setAttribute('cx', vCursorX);
+        virtualCursorCore.setAttribute('cy', vCursorY);
+    } else {
             warningOverlay.classList.remove('hidden');
             setSkeletonVisibility(false);
             
