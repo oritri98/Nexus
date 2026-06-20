@@ -449,7 +449,7 @@ function setSkeletonVisibility(visible) {
                     item.classList.add('active-state-red');
                 } else if (itemAction === 'VOLUME UP' || itemAction === 'VOLUME DOWN') {
                     item.classList.add('active-state-yellow');
-                } else if (itemAction === 'BOSS KEY (DESKTOP MINIMIZE)') {
+                } else if (itemAction === 'DESKTOP MINIMIZE') {
                     item.classList.add('active-state-red');
                 } else if (itemAction === 'SCREENSHOT CAPTURED!') {
                     item.classList.add('active-flash');

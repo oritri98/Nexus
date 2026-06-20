@@ -53,208 +53,131 @@
                     <span class="sub-label">REAL-TIME GESTURE MECHANICS</span>
                 </header>
 
-                <div class="showcase-grid">
-                    <!-- Gesture Card 1: Cursor Hover -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Point your index finger and move it in the air to guide the cursor.</div>
-                        <div class="showcase-header">
-                            <h3>Cursor Navigation</h3>
-                            <span class="gesture-badge">Index Pointer</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-hover">
-                                    <div class="hover-finger"></div>
+                                <div class="armory-segments">
+                    <div class="armory-top-row">
+                        <!-- Left Segment -->
+                        <div class="armory-segment">
+                            <h3 class="segment-title">Left Hand Gestures (System Controls)</h3>
+                            <div class="segment-grid">
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Make a closed fist with your left hand for more than 0.6 seconds to show the desktop.</div>
+                                    <div class="showcase-header"><h3>Minimize Windows</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-fist"><div class="fist-shape"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-boss"><div class="mock-windows"><div class="win window-1"></div><div class="win window-2"></div></div><div class="mock-desktop"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Show an open palm with your left hand for more than 0.6 seconds to restore the windows.</div>
+                                    <div class="showcase-header"><h3>Maximize Windows</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch-pinky"><div class="hand-shape-pinky" style="animation: none; transform: none;"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-boss" style="animation-direction: reverse;"><div class="mock-windows"><div class="win window-1"></div><div class="win window-2"></div></div><div class="mock-desktop"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Make a "phone" gesture with your left hand (only thumb and pinky up). It saves screenshots to a screenshots directory.</div>
+                                    <div class="showcase-header"><h3>Take a Screenshot</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-spiderman"><div class="spiderman-hand"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-flash"><div class="mock-flash"></div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="1.5" style="width: 24px; height: 24px; position: absolute; z-index: 1;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg></div></div>
+                                    </div>
+                                </div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Make a closed fist with your left thumb pointing straight up.</div>
+                                    <div class="showcase-header"><h3>Volume Up</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch-pinky"><div class="hand-shape-pinky" style="transform: rotate(0); animation: none; border-radius: 8px 8px 14px 14px;"><div style="position:absolute;top:-10px;left:5px;width:6px;height:12px;background:var(--accent-yellow);border-radius:2px;"></div></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-vol"><div class="vol-slider-mock"><div class="vol-fill" style="width: 80%; animation: none;"></div></div><span class="vol-label" style="animation: none; color: var(--accent-yellow);">VOL: UP</span></div></div>
+                                    </div>
+                                </div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Make a closed fist with your left thumb pointing straight down.</div>
+                                    <div class="showcase-header"><h3>Volume Down</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch-pinky"><div class="hand-shape-pinky" style="transform: rotate(180deg); animation: none; border-radius: 8px 8px 14px 14px;"><div style="position:absolute;top:-10px;left:5px;width:6px;height:12px;background:var(--accent-yellow);border-radius:2px;"></div></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-vol"><div class="vol-slider-mock"><div class="vol-fill" style="width: 20%; animation: none;"></div></div><span class="vol-label" style="animation: none; color: var(--accent-yellow);">VOL: DOWN</span></div></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-cursor">
-                                    <div class="mock-cursor"></div>
-                                </div>
-                            </div>
                         </div>
-                    </div>
 
-                    <!-- Gesture Card 2: Click & Drag -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Bring index and thumb together to click and select items.</div>
-                        <div class="showcase-header">
-                            <h3>Select & Drag</h3>
-                            <span class="gesture-badge">Index + Thumb Pinch</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-pinch">
-                                    <div class="hand-shape"></div>
-                                    <div class="pinch-dot"></div>
+                        <!-- Right Segment -->
+                        <div class="armory-segment">
+                            <h3 class="segment-title">Right Hand Gestures (Primary Mouse Controls)</h3>
+                            <div class="segment-grid">
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Hold your right index finger up. The cursor will follow your finger's movement.</div>
+                                    <div class="showcase-header"><h3>Move Cursor</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-hover"><div class="hover-finger"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-cursor"><div class="mock-cursor"></div></div></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-click">
-                                    <div class="mock-cursor"></div>
-                                    <div class="mock-file"></div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Pinch your right index finger and thumb together.</div>
+                                    <div class="showcase-header"><h3>Left Click</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch"><div class="hand-shape"></div><div class="pinch-dot"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-click"><div class="mock-cursor"></div><div class="mock-file"></div></div></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gesture Card 3: Right Click -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Make a gun shape (index and thumb extended) to open right-click context menus.</div>
-                        <div class="showcase-header">
-                            <h3>Context Menu</h3>
-                            <span class="gesture-badge">Two-finger gun shape</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-pinch-middle">
-                                    <div class="hand-shape-middle"></div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Hold only your right pinky finger up (all other fingers closed).</div>
+                                    <div class="showcase-header"><h3>Right Click</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch-middle"><div class="hand-shape-middle"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-menu"><div class="mock-menu"><div class="menu-line"></div><div class="menu-line"></div></div></div></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-menu">
-                                    <div class="mock-menu">
-                                        <div class="menu-line"></div>
-                                        <div class="menu-line"></div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Pinch your right pinky and thumb together. This holds the mouse button down, allowing you to drag items by moving your hand. Releasing the pinch releases the drag.</div>
+                                    <div class="showcase-header"><h3>Click and Drag</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-pinch"><div class="hand-shape" style="border-radius: 50% 10% 50% 50%;"></div><div class="pinch-dot"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-click"><div class="mock-cursor"></div><div class="mock-file" style="animation: none; border-color: var(--accent-cyan); background: rgba(0, 229, 255, 0.08); transform: scale(1);"></div></div></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Gesture Card 4: Toggle Scroll -->
-                    <div class="showcase-card glass-panel">
-                            <div class="card-desc-bubble">Hold up index, middle, and ring fingers to toggle the scrolling mode.</div>
-                        <div class="showcase-header">
-                            <h3>Toggle Scroll</h3>
-                            <span class="gesture-badge">Three fingers up</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-pinch-ring">
-                                    <div class="hand-shape-ring"></div>
-                                </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-open">
-                                    <div class="mock-folder"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Gesture Card 5: Open YouTube -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Hold up index and middle fingers (peace sign) to instantly open YouTube.</div>
-                        <div class="showcase-header">
-                            <h3>Open YouTube</h3>
-                            <span class="gesture-badge">Peace Sign</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-peace">
-                                    <div class="peace-fingers"></div>
-                                </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-scroll">
-                                    <div class="mock-webpage">
-                                        <div class="web-line line-1"></div>
-                                        <div class="web-line line-2"></div>
-                                        <div class="web-line line-3"></div>
+                    <!-- Bottom Row -->
+                    <div class="armory-bottom-row">
+                        <div class="armory-segment">
+                            <h3 class="segment-title">Two-Handed Gestures (Scroll Mode)</h3>
+                            <div class="segment-grid four-cols">
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Hold both hands up with open palms for more than 1 second.</div>
+                                    <div class="showcase-header"><h3>Enter Scroll Mode</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HANDS</span><div class="visual-placeholder loop-pinch-ring"><div class="hand-shape-ring" style="animation:none; transform:none; display:flex; gap:10px;"><div class="hand-shape-pinky" style="width:20px;height:20px;border-radius:2px;"></div><div class="hand-shape-pinky" style="width:20px;height:20px;border-radius:2px;"></div></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder"><span style="color:var(--accent-cyan); font-weight:bold; font-size:12px;">SCROLL MODE ON</span></div></div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <!-- Gesture Card 6: System Volume -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Open your palm to increase volume, or close it into a fist to decrease volume.</div>
-                        <div class="showcase-header">
-                            <h3>System Volume</h3>
-                            <span class="gesture-badge">Open Palm / Closed Fist</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-pinch-pinky">
-                                    <div class="hand-shape-pinky"></div>
-                                </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-vol">
-                                    <div class="vol-slider-mock">
-                                        <div class="vol-fill"></div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">While in scroll mode, hold your right index finger up.</div>
+                                    <div class="showcase-header"><h3>Scroll Up</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-hover"><div class="hover-finger"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-scroll"><div class="mock-webpage"><div class="web-line line-1" style="animation-direction:reverse;"></div><div class="web-line line-2" style="animation-direction:reverse;"></div><div class="web-line line-3" style="animation-direction:reverse;"></div></div></div></div>
                                     </div>
-                                    <span class="vol-label">VOL: 75%</span>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gesture Card 7: Boss Key -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Make a thumbs down gesture to instantly minimize all open windows.</div>
-                        <div class="showcase-header">
-                            <h3>Instant Stealth</h3>
-                            <span class="gesture-badge">Thumbs Down</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-fist">
-                                    <div class="fist-shape"></div>
-                                </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-boss">
-                                    <div class="mock-windows">
-                                        <div class="win window-1"></div>
-                                        <div class="win window-2"></div>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">While in scroll mode, hold both your right index and middle fingers up.</div>
+                                    <div class="showcase-header"><h3>Scroll Down</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HAND</span><div class="visual-placeholder loop-peace"><div class="peace-fingers"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder loop-scroll"><div class="mock-webpage"><div class="web-line line-1"></div><div class="web-line line-2"></div><div class="web-line line-3"></div></div></div></div>
                                     </div>
-                                    <div class="mock-desktop"></div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gesture Card 8: Spiderman Screenshot -->
-                    <div class="showcase-card glass-panel">
-                        <div class="card-desc-bubble">Make a "call me" sign (pinky and thumb extended) to capture a screenshot.</div>
-                        <div class="showcase-header">
-                            <h3>Screen Capture</h3>
-                            <span class="gesture-badge">Call Me Sign</span>
-                        </div>
-                        <div class="split-visuals">
-                            <div class="visual-pane hand-pane">
-                                <span class="pane-label">HAND GESTURE</span>
-                                <div class="visual-placeholder loop-spiderman">
-                                    <div class="spiderman-hand"></div>
-                                </div>
-                            </div>
-                            <div class="visual-pane screen-pane">
-                                <span class="pane-label">SCREEN REACTION</span>
-                                <div class="visual-placeholder loop-flash">
-                                    <div class="mock-flash"></div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="1.5" style="width: 24px; height: 24px; position: absolute; z-index: 1;">
-                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                                        <circle cx="12" cy="13" r="4" />
-                                    </svg>
+                                <div class="showcase-card glass-panel">
+                                    <div class="card-desc-bubble">Make a closed fist with both hands for more than 1 second.</div>
+                                    <div class="showcase-header"><h3>Exit Scroll Mode</h3></div>
+                                    <div class="split-visuals">
+                                        <div class="visual-pane hand-pane"><span class="pane-label">HANDS</span><div class="visual-placeholder loop-fist"><div class="fist-shape" style="animation:none; width:15px; height:15px; margin-right:5px;"></div><div class="fist-shape" style="animation:none; width:15px; height:15px;"></div></div></div>
+                                        <div class="visual-pane screen-pane"><span class="pane-label">SCREEN</span><div class="visual-placeholder"><span style="color:var(--text-muted); font-weight:bold; font-size:12px;">SCROLL MODE OFF</span></div></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -506,8 +429,8 @@
                                 </label>
                             </div>
 
-                            <!-- Matrix Item 7: Boss Key -->
-                            <div class="matrix-item" id="gesture-boss-key" data-gesture="BOSS KEY (DESKTOP MINIMIZE)">
+                            <!-- Matrix Item 7: Minimize Windows -->
+                            <div class="matrix-item" id="gesture-boss-key" data-gesture="DESKTOP MINIMIZE">
                                 <div class="item-status-light"></div>
                                 <div class="item-details">
                                     <h4>Minimize Windows</h4>
