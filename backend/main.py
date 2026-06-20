@@ -69,13 +69,18 @@ config = {
     },
     "gestures_enabled": {
         "hover": True,
-        "boss_key": True,
-        "screenshot": True,
-        "volume": True,
-        "scroll": True,
-        "click": True,
+        "left_click": True,
         "right_click": True,
-        "double_click": True
+        "click_drag": True,
+        "minimize": True,
+        "maximize": True,
+        "screenshot": True,
+        "volume_up": True,
+        "volume_down": True,
+        "enter_scroll": True,
+        "scroll_up": True,
+        "scroll_down": True,
+        "exit_scroll": True
     }
 }
 
@@ -243,7 +248,7 @@ def tracking_loop():
                     if two_hands_open_start is None:
                         two_hands_open_start = curr_t
                     elif curr_t - two_hands_open_start > 1.0:
-                        if not scroll_mode_active:
+                        if not scroll_mode_active and config["gestures_enabled"].get("enter_scroll", True):
                             scroll_mode_active = True
                             global_cooldown_until = curr_t + 1.0
                 else:
@@ -256,21 +261,28 @@ def tracking_loop():
                         two_hands_closed_start = curr_t
                     elif curr_t - two_hands_closed_start > 1.0:
                         if scroll_mode_active:
-                            scroll_mode_active = False
-                            global_cooldown_until = curr_t + 1.0
+                            if config["gestures_enabled"].get("exit_scroll", True):
+                                scroll_mode_active = False
+                                global_cooldown_until = curr_t + 1.0
+                                current_action = "EXIT SCROLL MODE"
+                                action_color = [100, 100, 100]
                 else:
                     if curr_t - last_both_closed_time > 0.3:
                         two_hands_closed_start = None
 
                 if scroll_mode_active:
-                    current_action = "SCROLL MODE ACTIVE"
+                    current_action = "ENTER SCROLL MODE"
                     action_color = [255, 0, 255]
                     # During scroll mode, only scrolling works. Let's say right hand controls it.
-                    if right_hand_state and config["gestures_enabled"].get("scroll", True):
+                    if right_hand_state:
                         if right_hand_state["is_index_up"] and not right_hand_state["is_middle_up"]:
-                            pyautogui.scroll(30)
+                            if config["gestures_enabled"].get("scroll_up", True):
+                                current_action = "SCROLL UP"
+                                pyautogui.scroll(30)
                         elif right_hand_state["is_index_up"] and right_hand_state["is_middle_up"]:
-                            pyautogui.scroll(-30)
+                            if config["gestures_enabled"].get("scroll_down", True):
+                                current_action = "SCROLL DOWN"
+                                pyautogui.scroll(-30)
                 elif both_open or both_closed or curr_t < global_cooldown_until:
                     # BLOCK ALL NORMAL GESTURES
                     current_action = "GESTURE STANDBY"
@@ -296,7 +308,7 @@ def tracking_loop():
                                     last_right_click_time = time.time()
                                     
                             # Left Click: Pinch index and thumb
-                            elif state["dist_idx_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("click", True):
+                            elif state["dist_idx_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("left_click", True):
                                 if time.time() - last_left_click_time > 0.5:
                                     current_action = "LEFT CLICK"
                                     action_color = [0, 255, 0]
@@ -304,7 +316,7 @@ def tracking_loop():
                                     last_left_click_time = time.time()
                                     
                             # Drag: Pinch thumb and pinky
-                            elif state["dist_pky_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("click", True):
+                            elif state["dist_pky_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("click_drag", True):
                                 current_action = "DRAG ENGAGED"
                                 action_color = [0, 100, 255]
                                 if not is_dragging:
@@ -345,7 +357,7 @@ def tracking_loop():
                                 if maximize_gesture_start is None:
                                     maximize_gesture_start = curr_t
                                 elif curr_t - maximize_gesture_start > 0.6:
-                                    if config['gestures_enabled'].get('boss_key', True):
+                                    if config['gestures_enabled'].get('maximize', True):
                                         if desktop_active and (curr_t - last_boss_key_time > 1.5):
                                             current_action = 'MAXIMIZE WINDOWS'
                                             action_color = [0, 255, 0]
@@ -360,7 +372,7 @@ def tracking_loop():
                                 if minimize_gesture_start is None:
                                     minimize_gesture_start = curr_t
                                 elif curr_t - minimize_gesture_start > 0.6:
-                                    if config['gestures_enabled'].get('boss_key', True):
+                                    if config['gestures_enabled'].get('minimize', True):
                                         if not desktop_active and (curr_t - last_boss_key_time > 1.5):
                                             current_action = 'MINIMIZE WINDOWS'
                                             action_color = [255, 0, 0]

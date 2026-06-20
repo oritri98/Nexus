@@ -420,7 +420,7 @@ function setSkeletonVisibility(visible) {
             }
         }
 
-        // Highlight active matrix item
+                // Highlight active matrix item
         const activeAction = data.current_action;
         const gestureItems = document.querySelectorAll('.matrix-item');
         
@@ -430,29 +430,21 @@ function setSkeletonVisibility(visible) {
             // Reset state highlighting, leaving the base class intact
             item.classList.remove('active-state', 'active-state-green', 'active-state-red', 'active-state-orange', 'active-state-purple', 'active-state-yellow', 'active-flash');
             
-            // For Volume, match either UP or DOWN
-            if (item.id === 'gesture-volume' && (activeAction === 'VOLUME UP' || activeAction === 'VOLUME DOWN')) {
-                itemAction = activeAction; // Force match
-            }
-            
             if (activeAction === itemAction && toggleModalityGestures.checked) {
                 if (itemAction === 'CURSOR HOVER') {
                     item.classList.add('active-state');
-                } else if (itemAction === 'DRAG / LEFT CLICK') {
+                } else if (itemAction === 'LEFT CLICK' || itemAction === 'DRAG ENGAGED') {
                     item.classList.add('active-state-green');
-                } else if (itemAction === 'RIGHT CLICK ISSUED') {
-                    item.classList.add('active-state-red');
-                } else if (itemAction === 'SCROLL MODE TOGGLED' || activeAction === 'SCROLL MODE ACTIVE') {
-                    // Flash for toggle, stay lit for active if we add that later
+                } else if (itemAction === 'RIGHT CLICK') {
+                    item.classList.add('active-state-orange');
+                } else if (itemAction === 'MINIMIZE WINDOWS' || itemAction === 'MAXIMIZE WINDOWS') {
                     item.classList.add('active-state-purple');
-                } else if (itemAction === 'OPENING YOUTUBE') {
-                    item.classList.add('active-state-red');
+                } else if (itemAction === 'SCREENSHOT') {
+                    item.classList.add('active-flash');
                 } else if (itemAction === 'VOLUME UP' || itemAction === 'VOLUME DOWN') {
                     item.classList.add('active-state-yellow');
-                } else if (itemAction === 'BOSS KEY (DESKTOP MINIMIZE)') {
+                } else if (itemAction === 'ENTER SCROLL MODE' || itemAction === 'SCROLL UP' || itemAction === 'SCROLL DOWN' || itemAction === 'EXIT SCROLL MODE') {
                     item.classList.add('active-state-red');
-                } else if (itemAction === 'SCREENSHOT CAPTURED!') {
-                    item.classList.add('active-flash');
                 }
             }
         });
@@ -473,16 +465,20 @@ function setSkeletonVisibility(visible) {
             voice_commands: toggleModalityVoice.checked
         };
         
-        const gesturesEnabled = {
+                const gesturesEnabled = {
             hover: document.getElementById('toggle-hover').checked,
-            click: document.getElementById('toggle-click').checked,
+            left_click: document.getElementById('toggle-left_click').checked,
             right_click: document.getElementById('toggle-right_click').checked,
-            double_click: false,
-            scroll: document.getElementById('toggle-scroll').checked,
-            youtube: document.getElementById('toggle-youtube').checked,
-            volume: document.getElementById('toggle-volume').checked,
-            boss_key: document.getElementById('toggle-boss_key').checked,
-            screenshot: document.getElementById('toggle-screenshot').checked
+            click_drag: document.getElementById('toggle-click_drag').checked,
+            minimize: document.getElementById('toggle-minimize').checked,
+            maximize: document.getElementById('toggle-maximize').checked,
+            screenshot: document.getElementById('toggle-screenshot').checked,
+            volume_up: document.getElementById('toggle-volume_up').checked,
+            volume_down: document.getElementById('toggle-volume_down').checked,
+            enter_scroll: document.getElementById('toggle-enter_scroll').checked,
+            scroll_up: document.getElementById('toggle-scroll_up').checked,
+            scroll_down: document.getElementById('toggle-scroll_down').checked,
+            exit_scroll: document.getElementById('toggle-exit_scroll').checked
         };
         
         const payload = {
