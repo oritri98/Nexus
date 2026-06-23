@@ -8,6 +8,12 @@ import asyncio
 import os
 import json
 import webbrowser
+import tempfile
+import speech_recognition as sr
+from groq import Groq
+from dotenv import load_dotenv
+
+load_dotenv()
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -43,6 +49,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 # Database file location
 DB_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "users.json"))
@@ -534,9 +543,88 @@ def tracking_loop():
             time.sleep(1)
 
 
+def voice_loop():
+    global telemetry, config
+    recognizer = sr.Recognizer()
+    try:
+        mic = sr.Microphone()
+    except Exception as e:
+        print(f"[VOICE ERROR] Could not find microphone: {e}")
+        return
+    
+    print("[SYSTEM] Core Voice Thread Started.")
+    try:
+        with mic as source:
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+    except Exception as e:
+        print(f"[VOICE ERROR] Failed to access microphone: {e}")
+        return
+
+    while True:
+        try:
+            if not config.get("engine_active", True) or not config["modalities"].get("voice_commands", False):
+                time.sleep(0.5)
+                continue
+                
+            with mic as source:
+                # listen for short chunks, wait up to 1 second for someone to start speaking, stop after 3 seconds
+                audio = recognizer.listen(source, timeout=1, phrase_time_limit=3)
+                
+            if audio and groq_client:
+                # Write to temp file
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+                    f.write(audio.get_wav_data())
+                    temp_path = f.name
+                
+                try:
+                    with open(temp_path, "rb") as audio_file:
+                        transcription = groq_client.audio.transcriptions.create(
+                            model="whisper-large-v3",
+                            file=(os.path.basename(temp_path), audio_file.read())
+                        )
+                    
+                    text = transcription.text.lower()
+                    print(f"[VOICE] Recognized: {text}")
+                    
+                    current_action = None
+                    if "left click" in text:
+                        current_action = "LEFT CLICK (VOICE)"
+                        pyautogui.click()
+                    elif "right click" in text:
+                        current_action = "RIGHT CLICK (VOICE)"
+                        pyautogui.click(button="right")
+                    elif "minimize" in text:
+                        current_action = "MINIMIZE WINDOWS (VOICE)"
+                        pyautogui.hotkey('win', 'd')
+                    elif "maximize" in text:
+                        current_action = "MAXIMIZE WINDOWS (VOICE)"
+                        pyautogui.hotkey('win', 'd')
+                    elif "screenshot" in text or "screen shot" in text:
+                        current_action = "SCREENSHOT (VOICE)"
+                        screenshot_path = os.path.join(SCREENSHOT_DIR, f'screenshot_voice_{int(time.time())}.png')
+                        pyautogui.screenshot(screenshot_path)
+                        
+                    if current_action:
+                        with telemetry_lock:
+                            telemetry["current_action"] = current_action
+                            telemetry["action_color"] = [255, 0, 0] # Red for voice actions
+                finally:
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                        
+        except sr.WaitTimeoutError:
+            pass # No speech detected in timeout
+        except Exception as e:
+            pass
+        time.sleep(0.1)
+
 # Start tracking loop in a background daemon thread
 t = threading.Thread(target=tracking_loop, daemon=True)
 t.start()
+
+# Start voice loop in a background daemon thread
+t_voice = threading.Thread(target=voice_loop, daemon=True)
+t_voice.start()
 
 
 # FastAPI WebSockets Connection
