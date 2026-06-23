@@ -212,8 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hub controls
     const smoothSlider = document.getElementById('smooth-slider');
     const smoothVal = document.getElementById('smooth-val');
+    const blinkSlider = document.getElementById('blink-slider');
+    const blinkVal = document.getElementById('blink-val');
     const opencvToggle = document.getElementById('opencv-toggle');
+    const cameraIndexInput = document.getElementById('camera-index-input');
     const toggleModalityGestures = document.getElementById('toggle-modality-gestures');
+    const toggleModalityFace = document.getElementById('toggle-modality-face');
     const toggleModalityVoice = document.getElementById('toggle-modality-voice');
     const btnShutdown = document.getElementById('btn-shutdown-system');
     
@@ -430,12 +434,12 @@ function setSkeletonVisibility(visible) {
             // Reset state highlighting, leaving the base class intact
             item.classList.remove('active-state', 'active-state-green', 'active-state-red', 'active-state-orange', 'active-state-purple', 'active-state-yellow', 'active-flash');
             
-            if (activeAction === itemAction && toggleModalityGestures.checked) {
-                if (itemAction === 'CURSOR HOVER') {
+            if (activeAction === itemAction && (toggleModalityGestures.checked || toggleModalityFace.checked)) {
+                if (itemAction === 'CURSOR HOVER' || itemAction === 'FACE CURSOR') {
                     item.classList.add('active-state');
-                } else if (itemAction === 'LEFT CLICK' || itemAction === 'DRAG ENGAGED') {
+                } else if (itemAction === 'LEFT CLICK' || itemAction === 'DRAG ENGAGED' || itemAction === 'LEFT CLICK (FACE)') {
                     item.classList.add('active-state-green');
-                } else if (itemAction === 'RIGHT CLICK') {
+                } else if (itemAction === 'RIGHT CLICK' || itemAction === 'RIGHT CLICK (FACE)') {
                     item.classList.add('active-state-orange');
                 } else if (itemAction === 'MINIMIZE WINDOWS' || itemAction === 'MAXIMIZE WINDOWS') {
                     item.classList.add('active-state-purple');
@@ -457,11 +461,13 @@ function setSkeletonVisibility(visible) {
         if (!socket || socket.readyState !== WebSocket.OPEN) return;
         
         const smoothValFloat = parseFloat(smoothSlider.value);
+        const blinkValFloat = parseFloat(blinkSlider.value);
         const showOpencv = opencvToggle.checked;
         
         // Modalities status
         const modalities = {
             hand_gestures: toggleModalityGestures.checked,
+            face_tracking: toggleModalityFace.checked,
             voice_commands: toggleModalityVoice.checked
         };
         
@@ -486,7 +492,9 @@ function setSkeletonVisibility(visible) {
             settings: {
                 engine_active: engineActiveState,
                 smooth_closeness: smoothValFloat,
+                blink_threshold: blinkValFloat,
                 show_opencv_window: showOpencv,
+                camera_index: parseInt(cameraIndexInput.value) || 0,
                 modalities: modalities,
                 gestures_enabled: gesturesEnabled
             }
@@ -498,9 +506,15 @@ function setSkeletonVisibility(visible) {
     smoothSlider.addEventListener('input', () => {
         smoothVal.textContent = parseFloat(smoothSlider.value).toFixed(1);
     });
+    
+    blinkSlider.addEventListener('input', () => {
+        blinkVal.textContent = parseFloat(blinkSlider.value).toFixed(2);
+    });
 
     smoothSlider.addEventListener('change', sendSettingsUpdate);
+    blinkSlider.addEventListener('change', sendSettingsUpdate);
     opencvToggle.addEventListener('change', sendSettingsUpdate);
+    cameraIndexInput.addEventListener('change', sendSettingsUpdate);
     toggleModalityGestures.addEventListener('change', () => {
         sendSettingsUpdate();
         if (toggleModalityGestures.checked && !engineActiveState) {
@@ -508,6 +522,7 @@ function setSkeletonVisibility(visible) {
             connectWebSocket();
         }
     });
+    toggleModalityFace.addEventListener('change', sendSettingsUpdate);
     toggleModalityVoice.addEventListener('change', sendSettingsUpdate);
 
     // Dynamic gesture toggles

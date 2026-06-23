@@ -25,6 +25,13 @@ options = vision.HandLandmarkerOptions(base_options=base_options,
                                        min_tracking_confidence=0.75)
 detector = vision.HandLandmarker.create_from_options(options)
 
+face_base_options = mp_python.BaseOptions(model_asset_path=os.path.abspath(os.path.join(os.path.dirname(__file__), "face_landmarker.task")))
+face_options = vision.FaceLandmarkerOptions(base_options=face_base_options,
+                                            output_face_blendshapes=False,
+                                            output_facial_transformation_matrixes=False,
+                                            num_faces=1)
+face_detector = vision.FaceLandmarker.create_from_options(face_options)
+
 # Initialize FastAPI
 app = FastAPI(title="Nexus Gesture Engine")
 
@@ -61,10 +68,13 @@ telemetry = {
 # Configuration settings (dynamic from frontend)
 config = {
     "engine_active": True,
+    "camera_index": 0,
     "smooth_closeness": 2.0,
+    "blink_threshold": 0.22,
     "show_opencv_window": False,
     "modalities": {
         "hand_gestures": True,
+        "face_tracking": True,
         "voice_commands": False
     },
     "gestures_enabled": {
@@ -122,7 +132,7 @@ def tracking_loop():
     global telemetry, config, screen_w, screen_h
     
     cap = None
-    global detector
+    global detector, face_detector
     
     prev_x, prev_y = 0, 0
     prev_time = time.time()
@@ -143,13 +153,27 @@ def tracking_loop():
     last_both_closed_time = 0
     global_cooldown_until = 0
 
+    # Face tracking variables
+    last_left_turn_time = 0
+    last_right_turn_time = 0
+    is_head_currently_turned_left = False
+    is_head_currently_turned_right = False
+
     PINCH_ENGAGE = 28
     PINCH_RELEASE = 40
 
     print("[SYSTEM] Core Tracking Thread Started.")
 
+    current_camera_index = 0
+
     while True:
         try:
+            target_camera_index = config.get("camera_index", 0)
+            
+            if cap is not None and cap.isOpened() and current_camera_index != target_camera_index:
+                cap.release()
+                print(f"[SYSTEM] Camera index changed to {target_camera_index}. Releasing old camera.")
+                
             if not config.get("engine_active", True):
                 if cap is not None and cap.isOpened():
                     cap.release()
@@ -159,11 +183,12 @@ def tracking_loop():
                 continue
                 
             if cap is None or not cap.isOpened():
-                cap = cv2.VideoCapture(0)
+                current_camera_index = target_camera_index
+                cap = cv2.VideoCapture(current_camera_index)
                 if not cap.isOpened():
                     time.sleep(1.0)
                     continue
-                print("[SYSTEM] Camera Initialized (Engine Active).")
+                print(f"[SYSTEM] Camera {current_camera_index} Initialized (Engine Active).")
                 
             success, frame = cap.read()
             if not success:
@@ -176,6 +201,13 @@ def tracking_loop():
             
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
             results = detector.detect(mp_image)
+            face_results = face_detector.detect(mp_image)
+            
+            # Draw Face Mesh
+            if face_results.face_landmarks and config["modalities"].get("face_tracking", True):
+                for flm in face_results.face_landmarks[0]:
+                    pt = (int(flm.x * w), int(flm.y * h))
+                    cv2.circle(frame, pt, 1, (0, 255, 255), -1)
             
             current_action = "SYSTEM IDLE"
             action_color = [0, 255, 255] # Cyan
@@ -237,170 +269,234 @@ def tracking_loop():
                     else:
                         left_hand_state = state
 
-                # Scroll toggle logic (Both hands)
-                both_open = len(hands_data) >= 2 and all(h["is_open_palm"] for h in hands_data[:2])
-                both_closed = len(hands_data) >= 2 and all(h["is_fist"] for h in hands_data[:2])
-                
-                curr_t = time.time()
-                
-                if both_open:
-                    last_both_open_time = curr_t
-                    if two_hands_open_start is None:
-                        two_hands_open_start = curr_t
-                    elif curr_t - two_hands_open_start > 1.0:
-                        if not scroll_mode_active and config["gestures_enabled"].get("enter_scroll", True):
-                            scroll_mode_active = True
+            # Scroll toggle logic (Both hands)
+            both_open = len(hands_data) >= 2 and all(h["is_open_palm"] for h in hands_data[:2])
+            both_closed = len(hands_data) >= 2 and all(h["is_fist"] for h in hands_data[:2])
+            
+            curr_t = time.time()
+            
+            if both_open:
+                last_both_open_time = curr_t
+                if two_hands_open_start is None:
+                    two_hands_open_start = curr_t
+                elif curr_t - two_hands_open_start > 1.0:
+                    if not scroll_mode_active and config["gestures_enabled"].get("enter_scroll", True):
+                        scroll_mode_active = True
+                        global_cooldown_until = curr_t + 1.0
+            else:
+                if curr_t - last_both_open_time > 0.3:
+                    two_hands_open_start = None
+                    
+            if both_closed:
+                last_both_closed_time = curr_t
+                if two_hands_closed_start is None:
+                    two_hands_closed_start = curr_t
+                elif curr_t - two_hands_closed_start > 1.0:
+                    if scroll_mode_active:
+                        if config["gestures_enabled"].get("exit_scroll", True):
+                            scroll_mode_active = False
                             global_cooldown_until = curr_t + 1.0
-                else:
-                    if curr_t - last_both_open_time > 0.3:
-                        two_hands_open_start = None
-                        
-                if both_closed:
-                    last_both_closed_time = curr_t
-                    if two_hands_closed_start is None:
-                        two_hands_closed_start = curr_t
-                    elif curr_t - two_hands_closed_start > 1.0:
-                        if scroll_mode_active:
-                            if config["gestures_enabled"].get("exit_scroll", True):
-                                scroll_mode_active = False
-                                global_cooldown_until = curr_t + 1.0
-                                current_action = "EXIT SCROLL MODE"
-                                action_color = [100, 100, 100]
-                else:
-                    if curr_t - last_both_closed_time > 0.3:
-                        two_hands_closed_start = None
+                            current_action = "EXIT SCROLL MODE"
+                            action_color = [100, 100, 100]
+            else:
+                if curr_t - last_both_closed_time > 0.3:
+                    two_hands_closed_start = None
 
-                if scroll_mode_active:
-                    current_action = "ENTER SCROLL MODE"
-                    action_color = [255, 0, 255]
-                    # During scroll mode, only scrolling works. Let's say right hand controls it.
+            if scroll_mode_active:
+                current_action = "ENTER SCROLL MODE"
+                action_color = [255, 0, 255]
+                # During scroll mode, only scrolling works. Let's say right hand controls it.
+                if right_hand_state:
+                    if right_hand_state["is_index_up"] and not right_hand_state["is_middle_up"]:
+                        if config["gestures_enabled"].get("scroll_up", True):
+                            current_action = "SCROLL UP"
+                            pyautogui.scroll(30)
+                    elif right_hand_state["is_index_up"] and right_hand_state["is_middle_up"]:
+                        if config["gestures_enabled"].get("scroll_down", True):
+                            current_action = "SCROLL DOWN"
+                            pyautogui.scroll(-30)
+            elif both_open or both_closed or curr_t < global_cooldown_until:
+                # BLOCK ALL NORMAL GESTURES
+                current_action = "GESTURE STANDBY"
+                action_color = [100, 100, 100]
+            else:
+                # Normal Gestures
+                hands_detected = bool(right_hand_state or left_hand_state)
+                if config["modalities"]["hand_gestures"] and hands_detected:
                     if right_hand_state:
-                        if right_hand_state["is_index_up"] and not right_hand_state["is_middle_up"]:
-                            if config["gestures_enabled"].get("scroll_up", True):
-                                current_action = "SCROLL UP"
-                                pyautogui.scroll(30)
-                        elif right_hand_state["is_index_up"] and right_hand_state["is_middle_up"]:
-                            if config["gestures_enabled"].get("scroll_down", True):
-                                current_action = "SCROLL DOWN"
-                                pyautogui.scroll(-30)
-                elif both_open or both_closed or curr_t < global_cooldown_until:
-                    # BLOCK ALL NORMAL GESTURES
-                    current_action = "GESTURE STANDBY"
-                    action_color = [100, 100, 100]
-                else:
-                    # Normal Gestures
-                    if config["modalities"]["hand_gestures"]:
-                        if right_hand_state:
-                            state = right_hand_state
+                        state = right_hand_state
+                        
+                        target_x = int(state["index_x"] * screen_w)
+                        target_y = int(state["index_y"] * screen_h)
+                        smooth = float(config["smooth_closeness"])
+                        curr_x = prev_x + (target_x - prev_x) / smooth
+                        curr_y = prev_y + (target_y - prev_y) / smooth
+                        
+                        # Right Click: Only pinky showing
+                        if state["is_pinky_up"] and not state["is_index_up"] and not state["is_middle_up"] and not state["is_ring_up"] and not state["is_thumb_up"]:
+                            if config["gestures_enabled"].get("right_click", True) and (time.time() - last_right_click_time > 1.0):
+                                current_action = "RIGHT CLICK"
+                                action_color = [255, 165, 0]
+                                pyautogui.click(button='right')
+                                last_right_click_time = time.time()
+                                
+                        # Left Click: Pinch index and thumb
+                        elif state["dist_idx_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("left_click", True):
+                            if time.time() - last_left_click_time > 0.5:
+                                current_action = "LEFT CLICK"
+                                action_color = [0, 255, 0]
+                                pyautogui.click()
+                                last_left_click_time = time.time()
+                                
+                        # Drag: Pinch thumb and pinky
+                        elif state["dist_pky_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("click_drag", True):
+                            current_action = "DRAG ENGAGED"
+                            action_color = [0, 100, 255]
+                            if not is_dragging:
+                                pyautogui.mouseDown()
+                                is_dragging = True
+                            pyautogui.moveTo(int(curr_x), int(curr_y))
+                            prev_x, prev_y = curr_x, curr_y
+                        
+                        # Move cursor: index finger showing
+                        elif state["is_index_up"]:
+                            if is_dragging and state["dist_pky_thumb"] > PINCH_RELEASE:
+                                pyautogui.mouseUp()
+                                is_dragging = False
                             
-                            target_x = int(state["index_x"] * screen_w)
-                            target_y = int(state["index_y"] * screen_h)
-                            smooth = float(config["smooth_closeness"])
-                            curr_x = prev_x + (target_x - prev_x) / smooth
-                            curr_y = prev_y + (target_y - prev_y) / smooth
+                            current_action = "CURSOR HOVER"
+                            action_color = [0, 255, 255]
+                            if config["gestures_enabled"].get("hover", True):
+                                pyautogui.moveTo(int(curr_x), int(curr_y))
+                            prev_x, prev_y = curr_x, curr_y
                             
-                            # Right Click: Only pinky showing
-                            if state["is_pinky_up"] and not state["is_index_up"] and not state["is_middle_up"] and not state["is_ring_up"] and not state["is_thumb_up"]:
-                                if config["gestures_enabled"].get("right_click", True) and (time.time() - last_right_click_time > 1.0):
-                                    current_action = "RIGHT CLICK"
-                                    action_color = [255, 165, 0]
-                                    pyautogui.click(button='right')
-                                    last_right_click_time = time.time()
-                                    
-                            # Left Click: Pinch index and thumb
-                            elif state["dist_idx_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("left_click", True):
-                                if time.time() - last_left_click_time > 0.5:
-                                    current_action = "LEFT CLICK"
+                        else:
+                            if is_dragging:
+                                pyautogui.mouseUp()
+                                is_dragging = False
+                            if current_action == "SYSTEM IDLE":
+                                current_action = "POINTER STOP (HAND OPEN)"
+                                action_color = [100, 255, 255]
+
+                    if left_hand_state:
+                        state = left_hand_state
+                        curr_t = time.time()
+                        
+                        is_maximize_pose = state['is_open_palm']
+                        is_minimize_pose = state['is_fist'] and not state['is_thumb_up'] and not state['is_thumb_down']
+                        
+                        # 1. Maximize windows: Palm open
+                        if is_maximize_pose:
+                            if maximize_gesture_start is None:
+                                maximize_gesture_start = curr_t
+                            elif curr_t - maximize_gesture_start > 0.6:
+                                if config['gestures_enabled'].get('maximize', True):
+                                    if desktop_active and (curr_t - last_boss_key_time > 1.5):
+                                        current_action = 'MAXIMIZE WINDOWS'
+                                        action_color = [0, 255, 0]
+                                        pyautogui.hotkey('win', 'd')
+                                        desktop_active = False
+                                        last_boss_key_time = curr_t
+                        else:
+                            maximize_gesture_start = None
+                                
+                        # 2. Minimize windows: Palm close motion
+                        if is_minimize_pose:
+                            if minimize_gesture_start is None:
+                                minimize_gesture_start = curr_t
+                            elif curr_t - minimize_gesture_start > 0.6:
+                                if config['gestures_enabled'].get('minimize', True):
+                                    if not desktop_active and (curr_t - last_boss_key_time > 1.5):
+                                        current_action = 'MINIMIZE WINDOWS'
+                                        action_color = [255, 0, 0]
+                                        pyautogui.hotkey('win', 'd')
+                                        desktop_active = True
+                                        last_boss_key_time = curr_t
+                        else:
+                            minimize_gesture_start = None
+
+                        # 3. Screenshot: Phone call sign
+                        if state['is_thumb_up'] and state['is_pinky_up'] and not state['is_index_up'] and not state['is_middle_up'] and not state['is_ring_up']:
+                            if config['gestures_enabled'].get('screenshot', True) and (curr_t - last_screenshot_time > 3.0):
+                                current_action = 'SCREENSHOT'
+                                action_color = [255, 255, 255]
+                                screenshot_path = os.path.join(SCREENSHOT_DIR, f'screenshot_{int(curr_t)}.png')
+                                pyautogui.screenshot(screenshot_path)
+                                last_screenshot_time = curr_t
+                                
+                        # 4. Volume Controls
+                        if state['is_fist']:
+                            if state['is_thumb_up'] and config['gestures_enabled'].get('volume', True):
+                                current_action = 'VOLUME UP'
+                                action_color = [255, 255, 0]
+                                pyautogui.press('volumeup')
+                            elif state['is_thumb_down'] and config['gestures_enabled'].get('volume', True):
+                                current_action = 'VOLUME DOWN'
+                                action_color = [255, 255, 0]
+                                pyautogui.press('volumedown')
+
+                elif config["modalities"].get("face_tracking", True) and face_results.face_landmarks:
+                    # Fallback to Face Gestures
+                    face_landmarks = face_results.face_landmarks[0]
+                    
+                    # Yaw calculation for head turns
+                    nose = face_landmarks[1]
+                    left_ear = face_landmarks[454]
+                    right_ear = face_landmarks[234]
+                    
+                    dx_left = left_ear.x - nose.x
+                    dx_right = nose.x - right_ear.x
+                    
+                    yaw_ratio = dx_left / dx_right if dx_right > 0 else 10.0
+                    
+                    is_head_turned_left = yaw_ratio < 0.20   # Looking to user's left (extreme turn)
+                    is_head_turned_right = yaw_ratio > 5.0  # Looking to user's right (extreme turn)
+                    
+                    # Cursor movement uses nose bridge (point 9) which is more stable than tip (point 1) when turning
+                    bridge = face_landmarks[9]
+                    target_x = int(bridge.x * screen_w)
+                    target_y = int(bridge.y * screen_h)
+                    smooth = float(config["smooth_closeness"])
+                    
+                    if is_head_turned_left or is_head_turned_right:
+                        # Freeze cursor when turning head
+                        curr_x, curr_y = prev_x, prev_y
+                    else:
+                        curr_x = prev_x + (target_x - prev_x) / smooth
+                        curr_y = prev_y + (target_y - prev_y) / smooth
+
+                    current_action = "FACE CURSOR"
+                    action_color = [0, 255, 255]
+                    
+                    if config["gestures_enabled"].get("hover", True):
+                        pyautogui.moveTo(int(curr_x), int(curr_y))
+                    prev_x, prev_y = curr_x, curr_y
+                    
+                    # Left Face Turn -> Left Click
+                    if is_head_turned_left:
+                        if not is_head_currently_turned_left:
+                            is_head_currently_turned_left = True
+                            if curr_t - last_left_turn_time > 1.0:
+                                if config["gestures_enabled"].get("left_click", True):
+                                    current_action = "LEFT CLICK (FACE)"
                                     action_color = [0, 255, 0]
                                     pyautogui.click()
-                                    last_left_click_time = time.time()
-                                    
-                            # Drag: Pinch thumb and pinky
-                            elif state["dist_pky_thumb"] < PINCH_ENGAGE and config["gestures_enabled"].get("click_drag", True):
-                                current_action = "DRAG ENGAGED"
-                                action_color = [0, 100, 255]
-                                if not is_dragging:
-                                    pyautogui.mouseDown()
-                                    is_dragging = True
-                                pyautogui.moveTo(int(curr_x), int(curr_y))
-                                prev_x, prev_y = curr_x, curr_y
-                            
-                            # Move cursor: index finger showing
-                            elif state["is_index_up"]:
-                                if is_dragging and state["dist_pky_thumb"] > PINCH_RELEASE:
-                                    pyautogui.mouseUp()
-                                    is_dragging = False
-                                
-                                current_action = "CURSOR HOVER"
-                                action_color = [0, 255, 255]
-                                if config["gestures_enabled"].get("hover", True):
-                                    pyautogui.moveTo(int(curr_x), int(curr_y))
-                                prev_x, prev_y = curr_x, curr_y
-                                
-                            else:
-                                if is_dragging:
-                                    pyautogui.mouseUp()
-                                    is_dragging = False
-                                if current_action == "SYSTEM IDLE":
-                                    current_action = "POINTER STOP (HAND OPEN)"
-                                    action_color = [100, 255, 255]
-
-                        if left_hand_state:
-                            state = left_hand_state
-                            curr_t = time.time()
-                            
-                            is_maximize_pose = state['is_open_palm']
-                            is_minimize_pose = state['is_fist'] and not state['is_thumb_up'] and not state['is_thumb_down']
-                            
-                            # 1. Maximize windows: Palm open
-                            if is_maximize_pose:
-                                if maximize_gesture_start is None:
-                                    maximize_gesture_start = curr_t
-                                elif curr_t - maximize_gesture_start > 0.6:
-                                    if config['gestures_enabled'].get('maximize', True):
-                                        if desktop_active and (curr_t - last_boss_key_time > 1.5):
-                                            current_action = 'MAXIMIZE WINDOWS'
-                                            action_color = [0, 255, 0]
-                                            pyautogui.hotkey('win', 'd')
-                                            desktop_active = False
-                                            last_boss_key_time = curr_t
-                            else:
-                                maximize_gesture_start = None
-                                    
-                            # 2. Minimize windows: Palm close motion
-                            if is_minimize_pose:
-                                if minimize_gesture_start is None:
-                                    minimize_gesture_start = curr_t
-                                elif curr_t - minimize_gesture_start > 0.6:
-                                    if config['gestures_enabled'].get('minimize', True):
-                                        if not desktop_active and (curr_t - last_boss_key_time > 1.5):
-                                            current_action = 'MINIMIZE WINDOWS'
-                                            action_color = [255, 0, 0]
-                                            pyautogui.hotkey('win', 'd')
-                                            desktop_active = True
-                                            last_boss_key_time = curr_t
-                            else:
-                                minimize_gesture_start = None
-
-                            # 3. Screenshot: Phone call sign
-                            if state['is_thumb_up'] and state['is_pinky_up'] and not state['is_index_up'] and not state['is_middle_up'] and not state['is_ring_up']:
-                                if config['gestures_enabled'].get('screenshot', True) and (curr_t - last_screenshot_time > 3.0):
-                                    current_action = 'SCREENSHOT'
-                                    action_color = [255, 255, 255]
-                                    screenshot_path = os.path.join(SCREENSHOT_DIR, f'screenshot_{int(curr_t)}.png')
-                                    pyautogui.screenshot(screenshot_path)
-                                    last_screenshot_time = curr_t
-                                    
-                            # 4. Volume Controls
-                            if state['is_fist']:
-                                if state['is_thumb_up'] and config['gestures_enabled'].get('volume', True):
-                                    current_action = 'VOLUME UP'
-                                    action_color = [255, 255, 0]
-                                    pyautogui.press('volumeup')
-                                elif state['is_thumb_down'] and config['gestures_enabled'].get('volume', True):
-                                    current_action = 'VOLUME DOWN'
-                                    action_color = [255, 255, 0]
-                                    pyautogui.press('volumedown')
+                                last_left_turn_time = curr_t
+                    else:
+                        is_head_currently_turned_left = False
+                        
+                    # Right Face Turn -> Right Click
+                    if is_head_turned_right:
+                        if not is_head_currently_turned_right:
+                            is_head_currently_turned_right = True
+                            if curr_t - last_right_turn_time > 1.0:
+                                if config["gestures_enabled"].get("right_click", True):
+                                    current_action = "RIGHT CLICK (FACE)"
+                                    action_color = [255, 165, 0]
+                                    pyautogui.click(button='right')
+                                last_right_turn_time = curr_t
+                    else:
+                        is_head_currently_turned_right = False
 
             # Calculate local FPS
             curr_time = time.time()
@@ -461,8 +557,12 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Update config safely
                     if "engine_active" in new_settings:
                         config["engine_active"] = bool(new_settings["engine_active"])
+                    if "camera_index" in new_settings:
+                        config["camera_index"] = int(new_settings["camera_index"])
                     if "smooth_closeness" in new_settings:
                         config["smooth_closeness"] = float(new_settings["smooth_closeness"])
+                    if "blink_threshold" in new_settings:
+                        config["blink_threshold"] = float(new_settings["blink_threshold"])
                     if "show_opencv_window" in new_settings:
                         config["show_opencv_window"] = bool(new_settings["show_opencv_window"])
                     if "gestures_enabled" in new_settings:
