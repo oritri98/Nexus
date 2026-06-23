@@ -312,6 +312,15 @@
                                 </div>
                                 <div class="modality-switch-card">
                                     <label class="switch">
+                                        <input type="checkbox" id="toggle-modality-face" checked>
+                                        <span class="slider-round"></span>
+                                    </label>
+                                    <div class="modality-label-group">
+                                        <span class="title">FACE TRACKING</span>
+                                    </div>
+                                </div>
+                                <div class="modality-switch-card">
+                                    <label class="switch">
                                         <input type="checkbox" id="toggle-modality-voice">
                                         <span class="slider-round"></span>
                                     </label>
@@ -331,12 +340,25 @@
                                 <input type="range" id="smooth-slider" min="1" max="15" step="0.5" value="2.0">
                             </div>
 
+                            <div class="setting-item-layout">
+                                <div class="slider-label-group">
+                                    <label for="blink-slider">BLINK SENSITIVITY</label>
+                                    <span id="blink-val" class="monospace font-accent">0.22</span>
+                                </div>
+                                <input type="range" id="blink-slider" min="0.10" max="0.35" step="0.01" value="0.22">
+                            </div>
+
                             <div class="toggle-row-layout">
                                 <label for="opencv-toggle">LOCAL CAMERA SCREEN</label>
                                 <label class="switch">
                                     <input type="checkbox" id="opencv-toggle">
                                     <span class="slider-round"></span>
                                 </label>
+                            </div>
+
+                            <div class="toggle-row-layout" style="margin-top: 15px;">
+                                <label for="camera-index-input">CAMERA INDEX</label>
+                                <input type="number" id="camera-index-input" value="0" min="0" max="10" style="width: 50px; background: transparent; color: var(--accent-cyan); border: 1px solid var(--accent-cyan); text-align: center; border-radius: 4px; padding: 2px;">
                             </div>
                         </div>
                     </div>
@@ -507,6 +529,32 @@
                                     <span class="mini-slider"></span>
                                 </label>
                             </div>
+
+                            <!-- Face Gestures (Fallback) -->
+                            <div class="matrix-item" id="gesture-face-cursor" data-gesture="FACE CURSOR">
+                                <div class="item-status-light"></div>
+                                <div class="item-details">
+                                    <h4>Nose Tracking</h4>
+                                    <p>When hands are not visible, move your head to control the cursor.</p>
+                                </div>
+                            </div>
+
+                            <div class="matrix-item" id="gesture-left-click-face" data-gesture="LEFT CLICK (FACE)">
+                                <div class="item-status-light"></div>
+                                <div class="item-details">
+                                    <h4>Left Click (Face)</h4>
+                                    <p>Double blink your left eye to trigger a left click.</p>
+                                </div>
+                            </div>
+
+                            <div class="matrix-item" id="gesture-right-click-face" data-gesture="RIGHT CLICK (FACE)">
+                                <div class="item-status-light"></div>
+                                <div class="item-details">
+                                    <h4>Right Click (Face)</h4>
+                                    <p>Double blink your right eye to trigger a right click.</p>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
