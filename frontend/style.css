@@ -2459,3 +2459,67 @@ input:checked+.slider-round:before {
     margin: 20px;
     padding-top: 20px;
 }
+
+/* Voice Command UI Panel */
+.voice-cmd-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 20, 30, 0.6);
+    border-left: 2px solid var(--accent-cyan);
+    border-radius: 0 8px 8px 0;
+    margin-top: 10px;
+    position: relative;
+}
+
+.voice-cmd-panel::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 15px;
+    width: 2px;
+    height: 20px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.voice-cmd-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.voice-btn {
+    background: rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    color: var(--accent-cyan);
+    padding: 8px 12px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.voice-btn::before {
+    content: '>';
+    margin-right: 8px;
+    opacity: 0.5;
+}
+
+.voice-btn:hover {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.voice-btn:active {
+    background: rgba(0, 229, 255, 0.3);
+    transform: translateX(2px);
+}
