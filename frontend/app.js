@@ -544,8 +544,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Dynamic gesture toggles
     const toggles = [
-        'toggle-hover', 'toggle-click', 'toggle-right_click',
-        'toggle-scroll', 'toggle-youtube', 'toggle-volume', 'toggle-boss_key', 'toggle-screenshot'
+        'toggle-hover', 'toggle-left_click', 'toggle-right_click', 'toggle-click_drag',
+        'toggle-minimize', 'toggle-maximize', 'toggle-screenshot', 'toggle-volume_up',
+        'toggle-volume_down', 'toggle-enter_scroll', 'toggle-scroll_up', 'toggle-scroll_down',
+        'toggle-exit_scroll'
     ];
 
     toggles.forEach(id => {
@@ -605,4 +607,20 @@ document.addEventListener('DOMContentLoaded', () => {
             connectWebSocket();
         }
     });
+
+    // Voice Control UI Toggle
+    const voiceCmdBtn = document.getElementById('gesture-voice-cmd');
+    const voiceCmdPanel = document.getElementById('voice-cmd-panel');
+    
+    if (voiceCmdBtn && voiceCmdPanel) {
+        voiceCmdBtn.addEventListener('click', () => {
+            if (voiceCmdPanel.style.display === 'none') {
+                voiceCmdPanel.style.display = 'block';
+                voiceCmdBtn.querySelector('p').textContent = 'Click to hide the commands';
+            } else {
+                voiceCmdPanel.style.display = 'none';
+                voiceCmdBtn.querySelector('p').textContent = 'Click to show the commands';
+            }
+        });
+    }
 });

@@ -2014,3 +2014,254 @@ input:checked + .slider-round:before {
     color: var(--accent-cyan);
     text-shadow: 0 0 8px var(--accent-cyan), 0 0 12px rgba(0, 229, 255, 0.5);
 }
+
+/* Voice Command UI Panel */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-tag {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--accent-cyan);
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+
+.developer-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    margin-top: 1px;
+}
+
+.developer-email {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+}
+
+/* Project Purpose Text */
+.project-purpose-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.project-purpose-section h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    text-shadow: 0 0 8px var(--accent-cyan), 0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+.project-purpose-section p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    text-align: justify;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+.purpose-highlight {
+    border-left: 2px solid var(--accent-violet);
+    padding-left: 12px;
+    color: #fff !important;
+    font-style: italic;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+}
+
+/* Roadmap timeline */
+.roadmap-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.roadmap-timeline {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    flex-grow: 1;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 24px;
+    position: relative;
+}
+
+.timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16px;
+    flex-shrink: 0;
+}
+
+.marker-dot {
+    width: 10px; height: 10px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.marker-dot.pulsing-node {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan), 0 0 16px var(--accent-cyan);
+    animation: markerPulse 2s infinite ease-in-out;
+}
+
+@keyframes markerPulse {
+    0% { transform: scale(0.9); box-shadow: 0 0 8px var(--accent-cyan); }
+    50% { transform: scale(1.2); box-shadow: 0 0 16px var(--accent-cyan); }
+    100% { transform: scale(0.9); box-shadow: 0 0 8px var(--accent-cyan); }
+}
+
+.marker-line {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    flex-grow: 1;
+    margin-top: 4px;
+    position: absolute;
+    top: 10px; bottom: -25px; left: 7px;
+}
+
+.timeline-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius-md);
+    padding: 16px 20px;
+    flex-grow: 1;
+}
+
+.release-code {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+
+.font-cyan {
+    color: var(--accent-cyan);
+}
+
+.font-violet {
+    color: var(--accent-violet);
+}
+
+.timeline-content h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.timeline-content p {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Purpose Text Styling */
+.purpose-list {
+    list-style: none;
+    padding-left: 10px;
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.purpose-list li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-light);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+.purpose-list li::before {
+    content: "►";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+    text-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.purpose-list li strong {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 8px var(--accent-cyan), 0 0 12px rgba(0, 229, 255, 0.5);
+}
+
+/* Voice Command UI Panel */
+.voice-cmd-panel {
+    position: relative;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    background: #020609;
+}
+
+.voice-cmd-panel::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: #020609;
+    border-left: 1px solid var(--accent-cyan);
+    border-top: 1px solid var(--accent-cyan);
+}
+
+.voice-cmd-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.voice-btn {
+    flex: 1;
+    background: rgba(4, 10, 18, 0.9);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: var(--accent-cyan);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 12px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.voice-btn:hover {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+
+.voice-btn:active {
+    transform: scale(0.97);
+}
