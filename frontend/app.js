@@ -101,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateToPage('landing');
     });
 
+    // Page 5 -> Dashboard
+    document.getElementById('btn-return-dashboard').addEventListener('click', () => {
+        navigateToPage('hub');
+    });
+
     // -----------------------------------------------------------------
     // 2. BIOMETRIC ACCESS TERMINAL (LOGIN)
     // -----------------------------------------------------------------
